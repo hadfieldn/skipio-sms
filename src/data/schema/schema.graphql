@@ -1,0 +1,115 @@
+# Skipio Campaign
+type Campaign {
+  # The ID of an object
+  id: ID!
+  name: String
+  description: String
+  status: String
+  contactsCount: Int
+  participantsCount: Int
+  contactIds: [String]
+  contacts: [Contact]
+}
+
+# Skipio Contact
+type Contact implements Node {
+  # The ID of an object
+  id: ID!
+  firstName: String
+  lastName: String
+  fullName: String
+  sortName: String
+  phoneMobileNational: String
+  phoneMobileInternational: String
+  isSkipioPhoneNumber: Boolean
+  isStarred: Boolean
+  isUnread: Boolean
+  email: String
+  streetAddress: String
+  zipCode: String
+  state: String
+  avatarImageUrl: String
+  deliveredOutboundMessageCount: Int
+  inboundMessageCount: Int
+  campaignsCount: Int
+  campaigns: [Campaign]
+}
+
+# SMS Message
+type Message {
+  # The ID of an object
+  id: ID!
+  authorName: String
+  authorAvatarUrl: String
+  deliveredAt: String
+  isRead: Boolean
+  isStarred: Boolean
+  human: Boolean
+  body: String
+  time: String
+  author: Contact
+}
+
+# Message list (INBOX, UNREAD, STARRED, or SENT)
+type MessageList {
+  # The ID of an object
+  id: ID!
+  contact: Contact
+  inboundMessageCount: Int
+  deliveredOutboundMessageCount: Int
+  mostRecentMessage: Message
+}
+
+enum MessageListScope {
+  INBOX
+  UNREAD
+  STARRED
+  SENT
+}
+
+# Root Mutation
+type Mutation {
+  sendSMS(input: SendSMSInputType!): SendSMSType
+}
+
+# An object with an ID
+interface Node {
+  # The id of the object.
+  id: ID!
+}
+
+# Root Query
+type Query {
+  # Fetches an object given its ID
+  node(
+    # The ID of an object
+    id: ID!
+  ): Node
+  viewer: User
+}
+
+input SendSMSInputType {
+  contactIds: [ID]!
+  message: String!
+}
+
+type SendSMSType {
+  success: Boolean
+}
+
+# Skipio User
+type User {
+  # The ID of an object
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phoneMobile: String
+  skipioPhoneNumber: String
+  avatarImageUrl: String
+  maxCharacters: Int
+  unreadCount: Int
+  plan: String
+  contacts(page: Int, per: Int, query: String): [Contact]
+  messageLists(page: Int, per: Int, scope: MessageListScope!, query: String): [MessageList]
+}
