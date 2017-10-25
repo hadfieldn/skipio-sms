@@ -3,11 +3,7 @@ import { QueryRenderer, graphql } from 'react-relay';
 import _ from 'lodash';
 import RelayEnvironment from './data/RelayEnvironment';
 import SendSMS from './data/mutations/SendSMS';
-import keysToCamelCase from './data/schema/keysToCamelCase';
-
-console.log({
-  camelCaseKeys: keysToCamelCase({ ids: ['0000', '0001', '00002'] }),
-});
+import { Button } from 'semantic-ui-react';
 
 const onClick = contact => {
   SendSMS(RelayEnvironment, [contact.id], 'This is a test message B')
@@ -25,81 +21,34 @@ const Example = props => (
           firstName
           lastName
           avatarImageUrl
-          contacts {
-            id
-            firstName
-            avatarImageUrl
-            campaigns {
+          pagedContacts {
+            meta {
+              currentPage
+              nextPage
+              prevPage
+              totalCount
+              totalPages
+            }
+            data {
               id
-              name
-              description
-              contactsCount
-              contactIds
-              contacts {
-                firstName
-              }
-            }
-          }
-          sentMessageList: messageLists(scope: SENT) {
-            id
-            contact {
               firstName
-              lastName
               avatarImageUrl
-            }
-            inboundMessageCount
-            deliveredOutboundMessageCount
-            mostRecentMessage {
-              authorName
-              body
-              deliveredAt
-              human
-              isRead
-              isStarred
-              author {
-                firstName
-                lastName
-                avatarImageUrl
-              }
-            }
-          }
-          inboxMessageList: messageLists(scope: INBOX) {
-            id
-            contact {
-              firstName
-              lastName
-              avatarImageUrl
-            }
-            inboundMessageCount
-            deliveredOutboundMessageCount
-            mostRecentMessage {
-              authorName
-              body
-              deliveredAt
-              human
-              isRead
-              isStarred
-              author {
-                firstName
-                lastName
-                avatarImageUrl
-              }
             }
           }
         }
       }
     `}
     render={({ error, props }) => {
-      console.log({ props });
       if (error) {
         return <div>{error.message}</div>;
       } else if (props) {
         console.log({ viewer: props.viewer });
         return (
           <div>
+            <Button>Click here</Button>
             <div>{_.get(props, 'viewer.firstName')} is great!</div>
             <img alt="Avatar" src={_.get(props, 'viewer.avatarImageUrl')} />
-            {_.map(_.get(props, 'viewer.contacts'), contact => (
+            {_.map(_.get(props, 'viewer.pagedContacts.data'), contact => (
               <div key={contact.id}>
                 <div>{contact.firstName}</div>
                 <div onClick={() => onClick(contact)}>

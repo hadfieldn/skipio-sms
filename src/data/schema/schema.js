@@ -17,6 +17,9 @@ import qs from 'qs';
 import keysToCamelCase from './keysToCamelCase';
 
 const schemaForEnv = env => {
+  if (!env) {
+    return null;
+  }
   // {{base_url}}/api/{{version}}/users/me?token={{token}}
   const BASE_URL = `${env.BACKEND_DOMAIN}/api/${env.API_VERSION}`;
 
@@ -27,28 +30,36 @@ const schemaForEnv = env => {
     return fetch(`${BASE_URL}${relativeURL}?${query}`, fetchParams);
   }
 
-  function fetchDataByURL(relativeURL, options) {
+  function fetchDataByURL(relativeURL, options = {}) {
     return fetchResponseByURL(relativeURL, options)
       .then(res => res.json())
       .then(json => keysToCamelCase(json))
       .then(json => {
-        console.log({ json });
-        return json.data;
+        const rootPath = _.isUndefined(options.root) ? 'data' : options.root;
+        return rootPath ? _.get(json, rootPath) : json;
       });
   }
 
-  const fetchContacts = queryParams => fetchDataByURL('/contacts', { queryParams });
+  const fetchContacts = queryParams =>
+    fetchDataByURL('/contacts', { queryParams, root: '' });
+  const fetchContactsWithIds = contactIds =>
+    Promise.all(_.map(contactIds, id => fetchContact(id)));
   const fetchContact = id => {
     console.log({ id });
     return fetchDataByURL(`/contacts/${id}`);
   };
   const fetchViewer = () => fetchDataByURL('/users/me');
-  const fetchMessageLists = queryParams => fetchDataByURL('/message_lists', { queryParams });
+  const fetchMessageLists = queryParams =>
+    fetchDataByURL('/message_lists', { queryParams, root: '' });
   const fetchMessageList = id => fetchDataByURL(`/message_lists/${id}`);
   // const fetchMessages = (contactId, queryParams) => fetchDataByURL(`/contacts/${contactId}/messages`, { queryParams });
-  const fetchMessage = (contactId, id) => fetchDataByURL(`/contacts/${contactId}/message/${id}`);
+  const fetchMessage = (contactId, id) =>
+    fetchDataByURL(`/contacts/${contactId}/message/${id}`);
 
-  const fetchCampaigns = campaignIds => Promise.all(_.map(campaignIds, id => fetchCampaign(id)));
+  const fetchCampaigns = queryParams =>
+    fetchDataByURL('/campaigns', { queryParams, root: '' });
+  const fetchCampaignsWithIds = campaignIds =>
+    Promise.all(_.map(campaignIds, id => fetchCampaign(id)));
   const fetchCampaign = id => fetchDataByURL(`/campaigns/${id}`);
 
   function sendSMS(args) {
@@ -79,7 +90,7 @@ const schemaForEnv = env => {
 
   const { nodeInterface, nodeField } = nodeDefinitions(
     globalId => {
-      const { type, id } = fromGlobalId(globalId);
+      const { type } = fromGlobalId(globalId);
       if (type === 'Contact') {
         return new DataLoader(ids => Promise.all(_.map(ids, fetchContact)));
       }
@@ -109,7 +120,7 @@ const schemaForEnv = env => {
       if (object.hasOwnProperty('participantsCount')) {
         return 'Campaign';
       }
-    }
+    },
   );
 
   const MessageListScopeType = new GraphQLEnumType({
@@ -146,7 +157,10 @@ const schemaForEnv = env => {
     name: 'MessageList',
     description: 'Message list (INBOX, UNREAD, STARRED, or SENT)',
     fields: () => ({
-      id: globalIdField('MessageList', (object, context, info) => object.messageListId),
+      id: globalIdField(
+        'MessageList',
+        (object, context, info) => object.messageListId,
+      ),
       contact: {
         type: ContactType,
         resolve: (parent, args) => fetchContact(parent.id),
@@ -154,6 +168,36 @@ const schemaForEnv = env => {
       inboundMessageCount: { type: GraphQLInt },
       deliveredOutboundMessageCount: { type: GraphQLInt },
       mostRecentMessage: { type: MessageType },
+    }),
+  });
+
+  const MetaType = new GraphQLObjectType({
+    name: 'Meta',
+    description: 'Metadata about a list',
+    fields: () => ({
+      currentPage: { type: GraphQLInt },
+      totalPages: { type: GraphQLInt },
+      totalCount: { type: GraphQLInt },
+      nextPage: { type: GraphQLInt },
+      prevPage: { type: GraphQLInt },
+    }),
+  });
+
+  const PagedContactsType = new GraphQLObjectType({
+    name: 'PagedContacts',
+    description: 'Contacts with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(ContactType) },
+    }),
+  });
+
+  const PagedMessageListsType = new GraphQLObjectType({
+    name: 'PagedMessageLists',
+    description: 'MessageLists with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(MessageListType) },
     }),
   });
 
@@ -171,8 +215,8 @@ const schemaForEnv = env => {
       maxCharacters: { type: GraphQLInt },
       unreadCount: { type: GraphQLInt },
       plan: { type: GraphQLString },
-      contacts: {
-        type: new GraphQLList(ContactType),
+      pagedContacts: {
+        type: PagedContactsType,
         args: {
           page: { type: GraphQLInt },
           per: { type: GraphQLInt },
@@ -180,8 +224,8 @@ const schemaForEnv = env => {
         },
         resolve: (parent, args) => fetchContacts(args),
       },
-      messageLists: {
-        type: new GraphQLList(MessageListType),
+      pagedMessageLists: {
+        type: PagedMessageListsType,
         args: {
           page: { type: GraphQLInt },
           per: { type: GraphQLInt },
@@ -189,6 +233,14 @@ const schemaForEnv = env => {
           query: { type: GraphQLString },
         },
         resolve: (parent, args) => fetchMessageLists(args),
+      },
+      pagedCampaigns: {
+        type: PagedCampaignsType,
+        args: {
+          page: { type: GraphQLInt },
+          per: { type: GraphQLInt },
+        },
+        resolve: (parent, args) => fetchCampaigns(args),
       },
     }),
   });
@@ -203,20 +255,21 @@ const schemaForEnv = env => {
       status: { type: GraphQLString },
       contactsCount: { type: GraphQLInt },
       participantsCount: { type: GraphQLInt },
-      contactIds: {
-        type: new GraphQLList(GraphQLString),
-        resolve: (parent, args) => {
-          console.log('contactIds', { parent, args });
-          return parent.contactIds;
-        },
-      },
       contacts: {
         type: new GraphQLList(ContactType),
         resolve: (parent, args) => {
-          console.log({ parent });
-          return Promise.all(_.map(parent.contactIds, id => fetchContact(id)));
+          return fetchContactsWithIds(_.keys(parent.contactIds));
         },
       },
+    }),
+  });
+
+  const PagedCampaignsType = new GraphQLObjectType({
+    name: 'PagedCampaigns',
+    description: 'Campaign list with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(CampaignType) },
     }),
   });
 
@@ -236,8 +289,9 @@ const schemaForEnv = env => {
       isUnread: { type: GraphQLBoolean },
       email: { type: GraphQLString },
       streetAddress: { type: GraphQLString },
-      zipCode: { type: GraphQLString },
+      city: { type: GraphQLString },
       state: { type: GraphQLString },
+      zipCode: { type: GraphQLString },
       avatarImageUrl: {
         type: GraphQLString,
         resolve: contact => contact.avatarUrl,
@@ -247,7 +301,8 @@ const schemaForEnv = env => {
       campaignsCount: { type: GraphQLInt },
       campaigns: {
         type: new GraphQLList(CampaignType),
-        resolve: (parent, args) => fetchCampaigns(_.keys(parent.campaignIds)),
+        resolve: (parent, args) =>
+          fetchCampaignsWithIds(_.keys(parent.campaignIds)),
       },
     }),
     interfaces: [nodeInterface],

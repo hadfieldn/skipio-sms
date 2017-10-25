@@ -7,14 +7,11 @@ import Env from '../Env';
 const schema = schemaForEnv(Env);
 const source = new RecordSource();
 const store = new Store(source);
+
+console.log('Creating environment...');
 const environment = new Environment({
   store,
   network: Network.create({ schema }),
 });
 
 export default environment;
-
-// const inspector = new RecordSourceInspector(source);
-//
-// inspector.getNodes(); // all records with an id
-// inspector.getRecords(); // all records with or without an id

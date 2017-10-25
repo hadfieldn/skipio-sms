@@ -7,7 +7,6 @@ type Campaign {
   status: String
   contactsCount: Int
   participantsCount: Int
-  contactIds: [String]
   contacts: [Contact]
 }
 
@@ -26,8 +25,9 @@ type Contact implements Node {
   isUnread: Boolean
   email: String
   streetAddress: String
-  zipCode: String
+  city: String
   state: String
+  zipCode: String
   avatarImageUrl: String
   deliveredOutboundMessageCount: Int
   inboundMessageCount: Int
@@ -67,6 +67,15 @@ enum MessageListScope {
   SENT
 }
 
+# Metadata about a list
+type Meta {
+  currentPage: Int
+  totalPages: Int
+  totalCount: Int
+  nextPage: Int
+  prevPage: Int
+}
+
 # Root Mutation
 type Mutation {
   sendSMS(input: SendSMSInputType!): SendSMSType
@@ -76,6 +85,24 @@ type Mutation {
 interface Node {
   # The id of the object.
   id: ID!
+}
+
+# Campaign list with paging meta data
+type PagedCampaigns {
+  meta: Meta
+  data: [Campaign]
+}
+
+# Contacts with paging meta data
+type PagedContacts {
+  meta: Meta
+  data: [Contact]
+}
+
+# MessageLists with paging meta data
+type PagedMessageLists {
+  meta: Meta
+  data: [MessageList]
 }
 
 # Root Query
@@ -110,6 +137,7 @@ type User {
   maxCharacters: Int
   unreadCount: Int
   plan: String
-  contacts(page: Int, per: Int, query: String): [Contact]
-  messageLists(page: Int, per: Int, scope: MessageListScope!, query: String): [MessageList]
+  pagedContacts(page: Int, per: Int, query: String): PagedContacts
+  pagedMessageLists(page: Int, per: Int, scope: MessageListScope!, query: String): PagedMessageLists
+  pagedCampaigns(page: Int, per: Int): PagedCampaigns
 }
