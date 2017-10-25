@@ -10,36 +10,38 @@ import {
   GraphQLInputObjectType,
   GraphQLNonNull,
 } from 'graphql';
-import {
-  globalIdField,
-  fromGlobalId,
-  nodeDefinitions,
-} from 'graphql-relay';
+import { globalIdField, fromGlobalId, nodeDefinitions } from 'graphql-relay';
 import DataLoader from 'dataloader';
 import _ from 'lodash';
 import qs from 'qs';
 import keysToCamelCase from './keysToCamelCase';
 
-const schemaForEnv = (env) => {
+const schemaForEnv = env => {
   // {{base_url}}/api/{{version}}/users/me?token={{token}}
   const BASE_URL = `${env.BACKEND_DOMAIN}/api/${env.API_VERSION}`;
 
   function fetchResponseByURL(relativeURL, options = {}) {
     const queryParams = options.queryParams || {};
     const fetchParams = options.fetchParams || {};
-    const query = qs.stringify({...queryParams, token: env.API_TOKEN});
-    return fetch(`${BASE_URL}${relativeURL}?${query}`, fetchParams)
+    const query = qs.stringify({ ...queryParams, token: env.API_TOKEN });
+    return fetch(`${BASE_URL}${relativeURL}?${query}`, fetchParams);
   }
 
   function fetchDataByURL(relativeURL, options) {
     return fetchResponseByURL(relativeURL, options)
       .then(res => res.json())
       .then(json => keysToCamelCase(json))
-      .then(json => { console.log({json}); return json.data; });
+      .then(json => {
+        console.log({ json });
+        return json.data;
+      });
   }
 
   const fetchContacts = queryParams => fetchDataByURL('/contacts', { queryParams });
-  const fetchContact = id => { console.log({ id }); return fetchDataByURL(`/contacts/${id}`) };
+  const fetchContact = id => {
+    console.log({ id });
+    return fetchDataByURL(`/contacts/${id}`);
+  };
   const fetchViewer = () => fetchDataByURL('/users/me');
   const fetchMessageLists = queryParams => fetchDataByURL('/message_lists', { queryParams });
   const fetchMessageList = id => fetchDataByURL(`/message_lists/${id}`);
@@ -53,11 +55,11 @@ const schemaForEnv = (env) => {
     const body = JSON.stringify({
       recipients: _.map(args.input.contactIds, globalId => {
         const { id } = fromGlobalId(globalId);
-        return `contact-${id}`
+        return `contact-${id}`;
       }),
       message: {
-        body: args.input.message
-      }
+        body: args.input.message,
+      },
     });
 
     const fetchParams = {
@@ -71,7 +73,7 @@ const schemaForEnv = (env) => {
       .then(res => ({ success: res.ok }))
       .catch(error => {
         console.error(error);
-        return ({ success: false });
+        return { success: false };
       });
   }
 
@@ -107,7 +109,7 @@ const schemaForEnv = (env) => {
       if (object.hasOwnProperty('participantsCount')) {
         return 'Campaign';
       }
-    },
+    }
   );
 
   const MessageListScopeType = new GraphQLEnumType({
@@ -117,7 +119,7 @@ const schemaForEnv = (env) => {
       UNREAD: { value: 'unread' },
       STARRED: { value: 'starred' },
       SENT: { value: 'sent' },
-    }
+    },
   });
 
   const MessageType = new GraphQLObjectType({
@@ -174,7 +176,7 @@ const schemaForEnv = (env) => {
         args: {
           page: { type: GraphQLInt },
           per: { type: GraphQLInt },
-          query: { type: GraphQLString }
+          query: { type: GraphQLString },
         },
         resolve: (parent, args) => fetchContacts(args),
       },
@@ -203,11 +205,17 @@ const schemaForEnv = (env) => {
       participantsCount: { type: GraphQLInt },
       contactIds: {
         type: new GraphQLList(GraphQLString),
-        resolve: (parent, args) => { console.log('contactIds', { parent, args }); return parent.contactIds; },
+        resolve: (parent, args) => {
+          console.log('contactIds', { parent, args });
+          return parent.contactIds;
+        },
       },
       contacts: {
         type: new GraphQLList(ContactType),
-        resolve: (parent, args) => { console.log({ parent }); return Promise.all(_.map(parent.contactIds, id => fetchContact(id))); },
+        resolve: (parent, args) => {
+          console.log({ parent });
+          return Promise.all(_.map(parent.contactIds, id => fetchContact(id)));
+        },
       },
     }),
   });
@@ -239,12 +247,11 @@ const schemaForEnv = (env) => {
       campaignsCount: { type: GraphQLInt },
       campaigns: {
         type: new GraphQLList(CampaignType),
-        resolve: (parent, args) => fetchCampaigns(_.keys(parent.campaignIds))
+        resolve: (parent, args) => fetchCampaigns(_.keys(parent.campaignIds)),
       },
     }),
-    interfaces: [ nodeInterface ],
+    interfaces: [nodeInterface],
   });
-
 
   const QueryRootType = new GraphQLObjectType({
     name: 'Query',
@@ -269,7 +276,7 @@ const schemaForEnv = (env) => {
   const SendSMSType = new GraphQLObjectType({
     name: 'SendSMSType',
     fields: () => ({
-      success: { type: GraphQLBoolean }
+      success: { type: GraphQLBoolean },
     }),
   });
 
@@ -280,17 +287,17 @@ const schemaForEnv = (env) => {
       sendSMS: {
         type: SendSMSType,
         args: {
-          input: { type: new GraphQLNonNull(SendSMSInputType) }
+          input: { type: new GraphQLNonNull(SendSMSInputType) },
         },
-        resolve: (root, { input }) => sendSMS({ input })
-      }
+        resolve: (root, { input }) => sendSMS({ input }),
+      },
     }),
   });
 
   return new GraphQLSchema({
     query: QueryRootType,
     mutation: MutationRootType,
-  })
+  });
 };
 
 export default schemaForEnv;

@@ -6,7 +6,4 @@ require('../../../public/env');
 
 const schema = schemaForEnv(global.__Environment);
 
-fs.writeFileSync(
-  path.join(__dirname, 'schema.graphql'),
-  printSchema(schema),
-);
+fs.writeFileSync(path.join(__dirname, 'schema.graphql'), printSchema(schema));

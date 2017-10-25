@@ -22,12 +22,17 @@
     "eject": "react-scripts eject",
     "relay": "relay-compiler --src ./src --schema ./src/data/schema/schema.graphql",
     "update-schema": "babel-node ./src/data/schema/updateSchema.js",
-    "build-fixtures": "yarn update-schema && yarn relay"
+    "build-fixtures": "yarn update-schema && yarn relay",
+    "lint": "prettier --write '{src,__{tests,mocks}__}/**/*.js'"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-plugin-relay": "^1.4.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.57.3",
+    "prettier": "1.7.4",
     "relay-compiler": "^1.4.1"
   }
 }

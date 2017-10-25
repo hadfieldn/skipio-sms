@@ -1,7 +1,4 @@
-import { Environment,
-  RecordSource,
-  Store,
-} from 'relay-runtime';
+import { Environment, RecordSource, Store } from 'relay-runtime';
 import { Network } from 'relay-local-schema';
 
 import schemaForEnv from './schema/schema';

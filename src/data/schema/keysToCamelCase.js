@@ -11,7 +11,7 @@ function keysToCamelCase(object) {
     });
 
     // Recursively apply throughout object
-    return _.mapValues(camelCaseObject, (value) => {
+    return _.mapValues(camelCaseObject, value => {
       if (_.isPlainObject(value)) {
         return keysToCamelCase(value);
       } else if (_.isArray(value)) {
