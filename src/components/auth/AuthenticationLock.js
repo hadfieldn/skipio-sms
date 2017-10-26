@@ -108,7 +108,7 @@ class AuthenticationLock extends React.PureComponent<Props, State> {
         <Modal open dimmer="inverted" size="tiny">
           {isLoading && <Loader />}
           <Modal.Header>
-            <Image src="/logo-dark2.png" width={92} centered />
+            <Image src="logo-dark2.png" width={92} centered />
           </Modal.Header>
           <Modal.Content>
             <Form onSubmit={this.onSubmit} error={isError}>

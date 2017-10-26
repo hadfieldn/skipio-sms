@@ -21,7 +21,7 @@ const Wrapper = (props: Props) => {
   return (
     <PageWrapper>
       <Container>
-        <LogoWrapper><Image src="/logo-dark2.png" width={92} /></LogoWrapper>
+        <LogoWrapper><Image src="logo-dark2.png" width={92} /></LogoWrapper>
         <Button
           content="Sign Out"
           icon="log out"
