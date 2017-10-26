@@ -22,7 +22,7 @@ Simple application that interfaces with the Skipio API to send messages to conta
 ## About
 This project gave me an opportunity to try out a few libraries:
 - [GraphQL.js](https://github.com/graphql/graphql-js): 
-  reference implementation of GraphQL for javaScript, facilitates front-end
+  reference implementation of GraphQL for JavaScript, facilitates front-end
   GraphQL resolvers that wrap REST endpoints.
 - [relay-local-schema](https://github.com/relay-tools/relay-local-schema): 
   Allows a front-end GraphQL schema to be used with Relay.
