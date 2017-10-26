@@ -1,7 +1,6 @@
 ## Skipio Messaging Application
 
 Simple application that interfaces with the Skipio API to send messages to contacts. 
-https://hadfieldn.github.io/skipio-sms/
 
 ## Installation
 1. Install [yarn](https://yarnpkg.com/lang/en/docs/install/).
