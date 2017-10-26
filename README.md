@@ -1,6 +1,7 @@
 ## Skipio Messaging Application
 
-Simple application that interfaces with the Skipio API to send messages to contacts.
+Simple application that interfaces with the Skipio API to send messages to contacts. 
+https://hadfieldn.github.io/skipio-sms/
 
 ## Installation
 1. Install [yarn](https://yarnpkg.com/lang/en/docs/install/).
@@ -46,4 +47,4 @@ A few lessons learned:
 - With the bugginess in fetch variables, lack of caching, poor documentation,
   and the need to compile fragments, Relay Modern feels much more clunky
   than the old Relay. Perhaps with more experience I'll feel differently, but
-  I think I would be inclined to try [Apollo](http://dev.apollodata.com/).
+  I think I would lean toward using [Apollo](http://dev.apollodata.com/) instead.
