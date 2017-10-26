@@ -18,7 +18,8 @@ Simple application that interfaces with the Skipio API to send messages to conta
 1. After generating a production build (above), copy the contents of the `build` 
    folder into the `docs` folder.
 1. In `docs/index.html`, replace `href="/` with `href="` and `src="/` with `src="`.
-1. Merge the docs folder into the GitHub repo. The 
+1. Merge the docs folder into the GitHub repo. The app will be served at
+   `https://<username>.github.io/<repo-name>/`.
 
 ## About
 This project gave me an opportunity to try out a few libraries:
