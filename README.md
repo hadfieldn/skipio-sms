@@ -16,7 +16,7 @@ Simple application that interfaces with the Skipio API to send messages to conta
 
 #### Deploying to a GitHub project page
 1. Make sure the `homepage` property in `package.json` is set to URL of the 
-   GitHub project page (`https://<username>github.com/<repo>`).
+   GitHub project page (`https://<username>.github.com/<repo>`).
 1. `yarn deploy`  
 
 ## About
