@@ -49,5 +49,10 @@ A few lessons learned:
   parameter).
 - With the bugginess in fetch variables, lack of caching, poor documentation,
   and the need to compile fragments, Relay Modern feels much more clunky
-  than the old Relay. Perhaps with more experience I'll feel differently, but
-  I think I would lean toward using [Apollo](http://dev.apollodata.com/) instead.
+  than the old Relay. Perhaps with more experience, and as Relay Modern 
+  matures, I'll feel differently, but I think I would lean toward using 
+  [Apollo](http://dev.apollodata.com/) as a GraphQL client instead. Relay
+  seems to be focused on the specific requirements of Facebook, which is
+  especially evident in the documentation (or lack of it), such as the fact
+  there is very little help for adding caching functionality as custom
+  middleware.
