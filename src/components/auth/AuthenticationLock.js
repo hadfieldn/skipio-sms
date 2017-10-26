@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Modal, Form, Button, Header, Loader } from 'semantic-ui-react';
+import { Modal, Form, Button, Header, Loader, Image } from 'semantic-ui-react';
 import Wrapper from './Wrapper';
 import { updateRelayEnvironment } from '../../data/RelayEnvironment';
 
@@ -12,7 +12,7 @@ type Props = {
 };
 type State = {
   isLocked: boolean,
-  apiKey: string,
+  apiToken: string,
   server: string,
   isError: boolean,
   isLoading: boolean,
@@ -21,25 +21,27 @@ type State = {
 class AuthenticationLock extends React.PureComponent<Props, State> {
   state = {
     isLocked: true,
-    apiKey: '',
+    apiToken: '',
     server: DefaultServer,
     isError: false,
     isLoading: false,
   };
 
   componentDidMount() {
-    const apiKey = window.sessionStorage.getItem('apiKey');
-    const server = window.sessionStorage.getItem('server');
-    if (apiKey && server) {
-      this.testAuthentication(server, apiKey)
+    const apiToken = window.sessionStorage.getItem('apiToken') || '';
+    let server = window.sessionStorage.getItem('server') || '';
+    if (apiToken && server) {
+      this.testAuthentication(server, apiToken)
         .then(() => {
           this.setState({ isLocked: false });
         })
         .catch(error => {
           this.setState({ isError: true });
         });
+    } else if (!server) {
+      server = DefaultServer;
     }
-    this.setState({ apiKey, server });
+    this.setState({ apiToken, server });
   }
 
   onFieldChange = (event: any, data: { name: string, value: string }) => {
@@ -48,11 +50,11 @@ class AuthenticationLock extends React.PureComponent<Props, State> {
   };
 
   onSubmit = async () => {
-    const { apiKey, server } = this.state;
+    const { apiToken, server } = this.state;
 
     try {
-      await this.testAuthentication(server, apiKey);
-      window.sessionStorage.setItem('apiKey', apiKey);
+      await this.testAuthentication(server, apiToken);
+      window.sessionStorage.setItem('apiToken', apiToken);
       window.sessionStorage.setItem('server', server);
       this.setState({ isLocked: false, isError: false });
     } catch (error) {
@@ -61,23 +63,30 @@ class AuthenticationLock extends React.PureComponent<Props, State> {
   };
 
   onLogout = () => {
-    window.sessionStorage.removeItem('apiKey');
+    window.sessionStorage.removeItem('apiToken');
     window.sessionStorage.removeItem('server');
     this.setState({
       isLocked: true,
       isError: false,
-      apiKey: '',
+      apiToken: '',
       server: DefaultServer,
     });
   };
 
-  testAuthentication = (server: string, apiKey: string): Promise<*> => {
+  testAuthentication = (server: string, apiToken: string): Promise<*> => {
     this.setState({ isLoading: true });
     return new Promise((resolve, reject) => {
-      fetch(`${server}/api/${ServerVersion}/users/me?token=${apiKey}`)
+      if (!server || !apiToken) {
+        reject();
+      }
+      fetch(`${server}/api/${ServerVersion}/users/me?token=${apiToken}`)
         .then(res => {
           if (res.ok) {
-            updateRelayEnvironment({ apiKey, server, apiVersion: ServerVersion });
+            updateRelayEnvironment({
+              apiToken,
+              server,
+              apiVersion: ServerVersion,
+            });
             resolve();
           } else {
             reject();
@@ -93,19 +102,21 @@ class AuthenticationLock extends React.PureComponent<Props, State> {
 
   render() {
     const { children } = this.props;
-    const { isLocked, apiKey, server, isError, isLoading } = this.state;
+    const { isLocked, apiToken, server, isError, isLoading } = this.state;
     if (isLocked) {
       return (
         <Modal open dimmer="inverted" size="tiny">
           {isLoading && <Loader />}
-          <Modal.Header><Header color="blue">Skipio</Header></Modal.Header>
+          <Modal.Header>
+            <Image src="/logo-dark2.png" width={92} centered />
+          </Modal.Header>
           <Modal.Content>
             <Form onSubmit={this.onSubmit} error={isError}>
               <Form.Input
-                label="API Key"
-                name="apiKey"
+                label="API Token"
+                name="apiToken"
                 type="password"
-                value={apiKey}
+                value={apiToken}
                 onChange={this.onFieldChange}
                 error={isError}
               />

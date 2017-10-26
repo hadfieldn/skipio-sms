@@ -12,7 +12,7 @@ const Provider = {
 };
 
 export const updateRelayEnvironment = (options: {
-  apiKey: string,
+  apiToken: string,
   server: string,
   apiVersion: string,
 }) => {

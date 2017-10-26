@@ -5,6 +5,10 @@ import { Button, Icon, Item, Label } from 'semantic-ui-react';
 
 import styled from 'styled-components';
 
+const ItemLines = styled.div`
+  display: inline-block;
+  margin-top: 8px;
+`;
 const ItemLine = styled.div``;
 
 const PhoneItem = styled.div`
@@ -29,35 +33,34 @@ const ContactCard = (props: {
       <Item.Content>
         <Item.Header>
           {contact.fullName}{' '}
-          {contact.isStarred && <Icon name="star" color="yellow" />}{' '}
+          {contact.isStarred && <Icon name="star" color="yellow" />}
         </Item.Header>
         <Item.Meta>
           <PhoneItem>{contact.phoneMobileNational}</PhoneItem>
-          {!!contact.inboundMessageCount && (
-            <Label
-              as="a"
-              color="green"
-              onClick={() => onViewMessages(contact)}
-            >
-              <Icon name="mail" /> {contact.inboundMessageCount} / {contact.deliveredOutboundMessageCount}
-            </Label>
-          )}
-        </Item.Meta>
-        <Item.Description>
-          <ItemLine>{contact.streetAddress}</ItemLine>
-          <ItemLine>
-            {contact.city} {contact.state} {contact.zipCode}
-          </ItemLine>
-        </Item.Description>
-        <Item.Extra>
           <Button
             primary
-            size="small"
             floated="right"
             onClick={() => onSendMessage(contact)}
           >
             Send Message
           </Button>
+        </Item.Meta>
+        <Item.Description>
+          <ItemLines>
+            <ItemLine>{contact.streetAddress}</ItemLine>
+            <ItemLine>
+              {contact.city} {contact.state} {contact.zipCode}
+            </ItemLine>
+          </ItemLines>
+        </Item.Description>
+        <Item.Extra>
+          <Label
+            size="tiny"
+            as="a"
+            icon="mail"
+            content={`${contact.inboundMessageCount} / ${contact.deliveredOutboundMessageCount}`}
+            onClick={() => onViewMessages(contact)}
+          />
         </Item.Extra>
       </Item.Content>
     </Item>

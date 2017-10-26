@@ -91,8 +91,22 @@ class ContactList extends React.Component<Props, State> {
 
     return (
       <Wrapper>
+        {isMessageEditorOpen && activeContact && (
+          <MessageEditor
+            maxChars={viewer.maxCharacters}
+            contact={activeContact}
+            onCancel={this.closeMessageEditor}
+            onSend={this.onSendMessage}
+          />
+        )}
+        {isMessagesViewerOpen && activeContact && (
+          <MessagesViewer
+            contact={activeContact}
+            onClose={this.closeMessagesViewer}
+          />
+        )}
         <Header as="h1" color="blue">
-          Contacts
+          My Contacts
         </Header>
         <PaginationMenu
           meta={meta}
@@ -113,20 +127,6 @@ class ContactList extends React.Component<Props, State> {
             />
           ))}
         </Item.Group>
-        {isMessageEditorOpen && activeContact && (
-          <MessageEditor
-            maxChars={viewer.maxCharacters}
-            contact={activeContact}
-            onCancel={this.closeMessageEditor}
-            onSend={this.onSendMessage}
-          />
-        )}
-        {isMessagesViewerOpen && activeContact && (
-          <MessagesViewer
-            contact={activeContact}
-            onClose={this.closeMessagesViewer}
-          />
-        )}
       </Wrapper>
     );
   }

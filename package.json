@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node ./setup && react-scripts start",
-    "build": "node ./setup && react-scripts build",
-    "test": "node ./setup && react-scripts test --env=jsdom",
+    "start": "node ./setup && yarn build-fixtures && react-scripts start",
+    "build": "node ./setup && yarn build-fixtures && react-scripts build",
+    "test": "node ./setup && yarn build-fixtures && react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "relay": "relay-compiler --src ./src --schema ./src/data/schema/schema.graphql",
     "update-schema": "babel-node ./src/data/schema/updateSchema.js",

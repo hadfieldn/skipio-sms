@@ -7,7 +7,7 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 const BodyText = styled.div`
-  color: ${props => (props.inbound ? '#21ba45' : 'inherit')};
+  color: ${props => (props.inbound ? '#2185CD' : 'inherit')};
 `;
 
 type Props = {
@@ -32,7 +32,7 @@ class MessageList extends React.Component<Props, State> {
       <Feed>
         {_.map(messages, message => {
           const isInbound = message.direction === 'inbound';
-          const headerColor = isInbound ? 'green' : 'grey';
+          const headerColor = isInbound ? 'blue' : 'grey';
           const timeAgo = moment(message.time).fromNow();
           return (
             <Feed.Event key={message.id}>

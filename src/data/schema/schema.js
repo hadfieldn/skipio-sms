@@ -23,7 +23,7 @@ const schemaForEnv = env => {
   function fetchResponseByURL(relativeURL, options = {}) {
     const queryParams = options.queryParams || {};
     const fetchParams = options.fetchParams || {};
-    const query = qs.stringify({ ...queryParams, token: env.apiKey });
+    const query = qs.stringify({ ...queryParams, token: env.apiToken });
     return fetch(`${BASE_URL}${relativeURL}?${query}`, fetchParams);
   }
 
