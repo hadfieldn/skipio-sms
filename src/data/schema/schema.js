@@ -17,7 +17,8 @@ import keysToCamelCase from './keysToCamelCase';
 
 const schemaForEnv = env => {
 
-  // {{base_url}}/api/{{version}}/users/me?token={{token}}
+  // Resolver functions
+
   const BASE_URL = `${env.server}/api/${env.apiVersion}`;
 
   function fetchResponseByURL(relativeURL, options = {}) {
@@ -86,6 +87,9 @@ const schemaForEnv = env => {
       });
   }
 
+
+  // Node queries
+
   const { nodeInterface, nodeField } = nodeDefinitions(
     globalId => {
       const { type, id } = fromGlobalId(globalId);
@@ -120,6 +124,9 @@ const schemaForEnv = env => {
       }
     },
   );
+
+
+  // Types
 
   const MessageListScopeType = new GraphQLEnumType({
     name: 'MessageListScope',
@@ -171,89 +178,6 @@ const schemaForEnv = env => {
     }),
   });
 
-  const MetaType = new GraphQLObjectType({
-    name: 'Meta',
-    description: 'Metadata about a list',
-    fields: () => ({
-      currentPage: { type: GraphQLInt },
-      totalPages: { type: GraphQLInt },
-      totalCount: { type: GraphQLInt },
-      nextPage: { type: GraphQLInt },
-      prevPage: { type: GraphQLInt },
-    }),
-  });
-
-  const PagedContactsType = new GraphQLObjectType({
-    name: 'PagedContacts',
-    description: 'Contacts with paging meta data',
-    fields: () => ({
-      meta: { type: MetaType },
-      data: { type: new GraphQLList(ContactType) },
-    }),
-  });
-
-  const PagedMessageListsType = new GraphQLObjectType({
-    name: 'PagedMessageLists',
-    description: 'MessageLists with paging meta data',
-    fields: () => ({
-      meta: { type: MetaType },
-      data: { type: new GraphQLList(MessageListType) },
-    }),
-  });
-
-  const PagedMessagesType = new GraphQLObjectType({
-    name: 'PagedMessages',
-    description: 'Messages with paging meta data',
-    fields: () => ({
-      meta: { type: MetaType },
-      data: { type: new GraphQLList(MessageType) },
-    }),
-  });
-
-  const UserType = new GraphQLObjectType({
-    name: 'User',
-    description: 'Skipio User',
-    fields: () => ({
-      id: globalIdField('User'),
-      firstName: { type: GraphQLString },
-      lastName: { type: GraphQLString },
-      email: { type: GraphQLString },
-      phoneMobile: { type: GraphQLString },
-      skipioPhoneNumber: { type: GraphQLString },
-      avatarImageUrl: { type: GraphQLString },
-      maxCharacters: { type: GraphQLInt },
-      unreadCount: { type: GraphQLInt },
-      plan: { type: GraphQLString },
-      pagedContacts: {
-        type: PagedContactsType,
-        args: {
-          page: { type: GraphQLInt },
-          per: { type: GraphQLInt },
-          query: { type: GraphQLString },
-        },
-        resolve: (parent, args) => fetchContacts(args),
-      },
-      pagedMessageLists: {
-        type: PagedMessageListsType,
-        args: {
-          page: { type: GraphQLInt },
-          per: { type: GraphQLInt },
-          scope: { type: new GraphQLNonNull(MessageListScopeType) },
-          query: { type: GraphQLString },
-        },
-        resolve: (parent, args) => fetchMessageLists(args),
-      },
-      pagedCampaigns: {
-        type: PagedCampaignsType,
-        args: {
-          page: { type: GraphQLInt },
-          per: { type: GraphQLInt },
-        },
-        resolve: (parent, args) => fetchCampaigns(args),
-      },
-    }),
-  });
-
   const CampaignType = new GraphQLObjectType({
     name: 'Campaign',
     description: 'Skipio Campaign',
@@ -270,15 +194,6 @@ const schemaForEnv = env => {
           return fetchContactsWithIds(_.keys(parent.contactIds));
         },
       },
-    }),
-  });
-
-  const PagedCampaignsType = new GraphQLObjectType({
-    name: 'PagedCampaigns',
-    description: 'Campaign list with paging meta data',
-    fields: () => ({
-      meta: { type: MetaType },
-      data: { type: new GraphQLList(CampaignType) },
     }),
   });
 
@@ -325,6 +240,98 @@ const schemaForEnv = env => {
     interfaces: [nodeInterface],
   });
 
+  const UserType = new GraphQLObjectType({
+    name: 'User',
+    description: 'Skipio User',
+    fields: () => ({
+      id: globalIdField('User'),
+      firstName: { type: GraphQLString },
+      lastName: { type: GraphQLString },
+      email: { type: GraphQLString },
+      phoneMobile: { type: GraphQLString },
+      skipioPhoneNumber: { type: GraphQLString },
+      avatarImageUrl: { type: GraphQLString },
+      maxCharacters: { type: GraphQLInt },
+      unreadCount: { type: GraphQLInt },
+      plan: { type: GraphQLString },
+      pagedContacts: {
+        type: PagedContactsType,
+        args: {
+          page: { type: GraphQLInt },
+          per: { type: GraphQLInt },
+          query: { type: GraphQLString },
+        },
+        resolve: (parent, args) => fetchContacts(args),
+      },
+      pagedMessageLists: {
+        type: PagedMessageListsType,
+        args: {
+          page: { type: GraphQLInt },
+          per: { type: GraphQLInt },
+          scope: { type: new GraphQLNonNull(MessageListScopeType) },
+          query: { type: GraphQLString },
+        },
+        resolve: (parent, args) => fetchMessageLists(args),
+      },
+      pagedCampaigns: {
+        type: PagedCampaignsType,
+        args: {
+          page: { type: GraphQLInt },
+          per: { type: GraphQLInt },
+        },
+        resolve: (parent, args) => fetchCampaigns(args),
+      },
+    }),
+  });
+
+  const MetaType = new GraphQLObjectType({
+    name: 'Meta',
+    description: 'Metadata about a list',
+    fields: () => ({
+      currentPage: { type: GraphQLInt },
+      totalPages: { type: GraphQLInt },
+      totalCount: { type: GraphQLInt },
+      nextPage: { type: GraphQLInt },
+      prevPage: { type: GraphQLInt },
+    }),
+  });
+
+  const PagedCampaignsType = new GraphQLObjectType({
+    name: 'PagedCampaigns',
+    description: 'Campaign list with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(CampaignType) },
+    }),
+  });
+
+  const PagedContactsType = new GraphQLObjectType({
+    name: 'PagedContacts',
+    description: 'Contacts with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(ContactType) },
+    }),
+  });
+
+  const PagedMessageListsType = new GraphQLObjectType({
+    name: 'PagedMessageLists',
+    description: 'MessageLists with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(MessageListType) },
+    }),
+  });
+
+  const PagedMessagesType = new GraphQLObjectType({
+    name: 'PagedMessages',
+    description: 'Messages with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(MessageType) },
+    }),
+  });
+
   const QueryRootType = new GraphQLObjectType({
     name: 'Query',
     description: 'Root Query',
@@ -336,6 +343,9 @@ const schemaForEnv = env => {
       },
     }),
   });
+
+
+  // Mutations
 
   const SendSMSInputType = new GraphQLInputObjectType({
     name: 'SendSMSInputType',
