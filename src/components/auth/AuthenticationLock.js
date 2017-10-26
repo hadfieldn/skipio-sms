@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Modal, Form, Button, Header, Loader, Image } from 'semantic-ui-react';
+import { Modal, Form, Button, Loader, Image } from 'semantic-ui-react';
 import Wrapper from './Wrapper';
 import { updateRelayEnvironment } from '../../data/RelayEnvironment';
 

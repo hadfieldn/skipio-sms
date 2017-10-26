@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Button, Container, Image, Header } from 'semantic-ui-react';
+import { Button, Container, Image } from 'semantic-ui-react';
 import styled from 'styled-components';
 
 const LogoWrapper = styled.div`
