@@ -11,22 +11,19 @@ import {
   GraphQLNonNull,
 } from 'graphql';
 import { globalIdField, fromGlobalId, nodeDefinitions } from 'graphql-relay';
-import DataLoader from 'dataloader';
 import _ from 'lodash';
 import qs from 'qs';
 import keysToCamelCase from './keysToCamelCase';
 
 const schemaForEnv = env => {
-  if (!env) {
-    return null;
-  }
+
   // {{base_url}}/api/{{version}}/users/me?token={{token}}
-  const BASE_URL = `${env.BACKEND_DOMAIN}/api/${env.API_VERSION}`;
+  const BASE_URL = `${env.server}/api/${env.apiVersion}`;
 
   function fetchResponseByURL(relativeURL, options = {}) {
     const queryParams = options.queryParams || {};
     const fetchParams = options.fetchParams || {};
-    const query = qs.stringify({ ...queryParams, token: env.API_TOKEN });
+    const query = qs.stringify({ ...queryParams, token: env.apiKey });
     return fetch(`${BASE_URL}${relativeURL}?${query}`, fetchParams);
   }
 
@@ -44,15 +41,16 @@ const schemaForEnv = env => {
     fetchDataByURL('/contacts', { queryParams, root: '' });
   const fetchContactsWithIds = contactIds =>
     Promise.all(_.map(contactIds, id => fetchContact(id)));
-  const fetchContact = id => {
-    console.log({ id });
-    return fetchDataByURL(`/contacts/${id}`);
-  };
+  const fetchContact = id => fetchDataByURL(`/contacts/${id}`);
   const fetchViewer = () => fetchDataByURL('/users/me');
   const fetchMessageLists = queryParams =>
     fetchDataByURL('/message_lists', { queryParams, root: '' });
   const fetchMessageList = id => fetchDataByURL(`/message_lists/${id}`);
-  // const fetchMessages = (contactId, queryParams) => fetchDataByURL(`/contacts/${contactId}/messages`, { queryParams });
+  const fetchMessages = (contactId, queryParams) =>
+    fetchDataByURL(`/contacts/${contactId}/messages`, {
+      queryParams,
+      root: '',
+    });
   const fetchMessage = (contactId, id) =>
     fetchDataByURL(`/contacts/${contactId}/message/${id}`);
 
@@ -90,18 +88,18 @@ const schemaForEnv = env => {
 
   const { nodeInterface, nodeField } = nodeDefinitions(
     globalId => {
-      const { type } = fromGlobalId(globalId);
+      const { type, id } = fromGlobalId(globalId);
       if (type === 'Contact') {
-        return new DataLoader(ids => Promise.all(_.map(ids, fetchContact)));
+        return fetchContact(id);
       }
       if (type === 'MessageList') {
-        return new DataLoader(ids => Promise.all(_.map(ids, fetchMessageList)));
+        fetchMessageList(id);
       }
       if (type === 'Message') {
-        return new DataLoader(ids => Promise.all(_.map(ids, fetchMessage)));
+        fetchMessage(id);
       }
       if (type === 'Campaign') {
-        return new DataLoader(ids => Promise.all(_.map(ids, fetchCampaign)));
+        fetchCampaign(id);
       }
     },
     object => {
@@ -146,6 +144,8 @@ const schemaForEnv = env => {
       human: { type: GraphQLBoolean },
       body: { type: GraphQLString },
       time: { type: GraphQLString },
+      direction: { type: GraphQLString },
+      messageType: { type: GraphQLString },
       author: {
         type: ContactType,
         resolve: (parent, args) => fetchContact(parent.authorId),
@@ -198,6 +198,15 @@ const schemaForEnv = env => {
     fields: () => ({
       meta: { type: MetaType },
       data: { type: new GraphQLList(MessageListType) },
+    }),
+  });
+
+  const PagedMessagesType = new GraphQLObjectType({
+    name: 'PagedMessages',
+    description: 'Messages with paging meta data',
+    fields: () => ({
+      meta: { type: MetaType },
+      data: { type: new GraphQLList(MessageType) },
     }),
   });
 
@@ -303,6 +312,14 @@ const schemaForEnv = env => {
         type: new GraphQLList(CampaignType),
         resolve: (parent, args) =>
           fetchCampaignsWithIds(_.keys(parent.campaignIds)),
+      },
+      pagedMessages: {
+        type: PagedMessagesType,
+        args: {
+          page: { type: GraphQLInt },
+          per: { type: GraphQLInt },
+        },
+        resolve: (parent, args) => fetchMessages(parent.id, args),
       },
     }),
     interfaces: [nodeInterface],

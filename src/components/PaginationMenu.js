@@ -6,7 +6,6 @@ import _ from 'lodash';
 type Props = {
   meta: Object,
   relay: Object,
-  onUpdate: Function,
 };
 type State = {
   page: number,
@@ -21,27 +20,28 @@ class PaginationMenu extends React.Component<Props, State> {
 
   onItemsPerPageSelection = (per: number) => {
     const newState = { page: 1, per };
-    console.log({ per });
     this.onRefetch(newState);
     this.setState(newState);
   };
 
   onPageSelection = (page: number) => {
     const newState = { ...this.state, page };
-    console.log({ page });
     this.onRefetch(newState);
     this.setState(newState);
   };
 
   onRefetch = (newState: { per: number, page: number }) => {
-    const { relay, onUpdate } = this.props;
-    console.log({ newState });
+    const { relay } = this.props;
     relay.refetch(newState, null, error => {
       if (error) {
         console.error(error);
       }
-      //      onUpdate();
     });
+  };
+
+
+  refetch = () => {
+    this.onRefetch(this.state);
   };
 
   render() {
@@ -61,7 +61,7 @@ class PaginationMenu extends React.Component<Props, State> {
         })}
         <Dropdown item text="Per page">
           <Dropdown.Menu>
-            {_.map([5, 10, 20], count => (
+            {_.map([5, 10, 20, 50, 100], count => (
               <Dropdown.Item
                 key={`items-per-page-${count}`}
                 onClick={() => this.onItemsPerPageSelection(count)}

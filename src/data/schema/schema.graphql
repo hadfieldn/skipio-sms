@@ -33,6 +33,7 @@ type Contact implements Node {
   inboundMessageCount: Int
   campaignsCount: Int
   campaigns: [Campaign]
+  pagedMessages(page: Int, per: Int): PagedMessages
 }
 
 # SMS Message
@@ -47,6 +48,8 @@ type Message {
   human: Boolean
   body: String
   time: String
+  direction: String
+  messageType: String
   author: Contact
 }
 
@@ -103,6 +106,12 @@ type PagedContacts {
 type PagedMessageLists {
   meta: Meta
   data: [MessageList]
+}
+
+# Messages with paging meta data
+type PagedMessages {
+  meta: Meta
+  data: [Message]
 }
 
 # Root Query
