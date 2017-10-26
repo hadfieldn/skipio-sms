@@ -35,14 +35,18 @@ A few lessons learned:
 - Documentation for Relay Modern is incomplete. Fortunately I was able to 
   Google examples as needed.
 - Relay Modern does not provide object caching, as the older Relay does. 
-  Caching can be implemented with middleware.
+  Caching can be implemented with middleware, but it's difficult to find
+  good documentation and examples.
 - Updating Relay fetch variables seemed a bit buggy. There is a callback 
   function available to the RefetchContainer that is supposed to pass the
-  current values used by the query, but I seemed to get the default values 
-  instead of the latest values. For the pagination component I made, I 
-  found that storing the fetch variables in the React component state,
-  rather than querying them from the callback function, worked much more 
-  reliably.
+  query arguments currently in use by the query, but I seemed to get the 
+  initial default values instead of the latest values. For the pagination 
+  component I made, I found that storing the fetch variables in the React
+  component state, rather than querying them from the callback function, 
+  worked much more reliably. Unfortunately, using the pagination component
+  to manage refetching means that it could be difficult to change other 
+  (non pagination) query parameters from other components (e.g., a search
+  parameter).
 - With the bugginess in fetch variables, lack of caching, poor documentation,
   and the need to compile fragments, Relay Modern feels much more clunky
   than the old Relay. Perhaps with more experience I'll feel differently, but
