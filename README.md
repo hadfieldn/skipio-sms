@@ -15,11 +15,9 @@ Simple application that interfaces with the Skipio API to send messages to conta
 1. Production build will be output to the `build` folder.
 
 #### Deploying to a GitHub project page
-1. After generating a production build (above), copy the contents of the `build` 
-   folder into the `docs` folder.
-1. In `docs/index.html`, replace `href="/` with `href="` and `src="/` with `src="`.
-1. Merge the docs folder into the GitHub repo. The app will be served at
-   `https://<username>.github.io/<repo-name>/`.
+1. Make sure the `homepage` property in `package.json` is set to URL of the 
+   GitHub project page (`https://<username>github.com/<repo>`).
+1. `yarn deploy`  
 
 ## About
 This project gave me an opportunity to try out a few libraries:
