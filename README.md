@@ -14,6 +14,12 @@ Simple application that interfaces with the Skipio API to send messages to conta
 1. ```yarn build```
 1. Production build will be output to the `build` folder.
 
+#### Deploying to a GitHub project page
+1. After generating a production build (above), copy the contents of the `build` 
+   folder into the `docs` folder.
+1. In `docs/index.html`, replace `href="/` with `href="` and `src="/` with `src="`.
+1. Merge the docs folder into the GitHub repo. The 
+
 ## About
 This project gave me an opportunity to try out a few libraries:
 - [GraphQL.js](https://github.com/graphql/graphql-js): 
